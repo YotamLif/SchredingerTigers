@@ -41,18 +41,22 @@ noiseModel.add_quantum_error(err3, ['z'], [2])
 
 
 
-dpt = range(1,circuit.depth())
+dpt = range(0,circuit.depth())
 diffCN = []
 diffCR = []
 diffNR = []
 for lyr in dpt:
+    if lyr == 0:
+        diffCN.append(0)
+        diffCR.append(0)
+        diffNR.append(0)
     nCirc = circ_break(circuit, lyr)
     cleanVec = plot_statevector(nCirc)
     noiseVec = get_noise_prob_vector(nCirc, noiseModel)
-    # realVec = RunTrue(nCirc,"9c4474dc9592228326651bd77bae7df998ffb5def6296d85789635df576a6b6004b19ba14b41224c0b60ce99bbb340c838f14ffb25af037c980ede48eef2d6e5")
+    realVec = RunTrue(nCirc,"9c4474dc9592228326651bd77bae7df998ffb5def6296d85789635df576a6b6004b19ba14b41224c0b60ce99bbb340c838f14ffb25af037c980ede48eef2d6e5")
     diffCN.append(diff_vec(cleanVec, noiseVec))
-    #diffCR.append(diff_vec(cleanVec, realVec))
-    #diffNR.append(diff_vec(noiseVec, realVec))
+    diffCR.append(diff_vec(cleanVec, realVec))
+    diffNR.append(diff_vec(noiseVec, realVec))
 
 plt.plot(dpt, diffCN)
 plt.show()
