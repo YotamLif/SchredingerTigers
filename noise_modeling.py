@@ -21,6 +21,21 @@ def apply_noise_model(noise_model: NoiseModel, circuit: QuantumCircuit, shots=10
     return res
 
 
+def apply_model(circuit: QuantumCircuit, shots=1024, backend='qasm_simulator'):
+    backend = Aer.get_backend(backend)
+    res = execute(circuit, backend, shots=shots).result()
+    return res
+
+
+def get_difference(noise_model: NoiseModel, circuit: QuantumCircuit, shots=1024, backend='qasm_simulator'):
+    res_noise = apply_noise_model(noise_model, circuit, shots, backend).get_counts()
+    res_no_noise = apply_model(circuit, shots, backend).get_counts()
+    diff = {}
+    for x in res_no_noise.keys():
+        diff[x] = res_no_noise[x] - res_noise[x]
+    return diff
+
+
 def main():
     err1 = pauli_error([('X', 0.2), ('I', 0.8)])
     err2 = pauli_error([('X', 0.3), ('I', 0.7)])
@@ -34,7 +49,7 @@ def main():
     circle.x(qr[1])
     circle.measure(qr, cr)
 
-    print(apply_noise_model(noise_model, circle).get_counts())
+    print(get_difference(noise_model, circle))
 
 
 if __name__ == '__main__':
