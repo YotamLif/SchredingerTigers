@@ -1,3 +1,8 @@
+from qiskit import execute
+from qiskit.providers.ibmq import least_busy, IBMQ
+from qiskit.tools.monitor import job_monitor
+
+
 def RunTrue(circ,APItoken,maxCred=10,Shots=1024):
     IBMQ.save_account(APItoken,overwrite=True)
     IBMQ.load_accounts(hub=None)
