@@ -9,6 +9,7 @@ from noise_modeling import get_noise_prob_vector, make_noise_model
 from run_true_comp import RunTrue
 import numpy as np
 import pickle
+from noise_modeling import get_prob_vector
 
 import matplotlib.pyplot as plt
 
@@ -51,18 +52,23 @@ for lyr in dpt:
         diffCN.append(0)
         diffCR.append(0)
         diffNR.append(0)
+        continue
     nCirc = circ_break(circuit, lyr)
-    cleanVec = plot_statevector(nCirc)
+    cleanVec = np.real(plot_statevector(nCirc))
     noiseVec = get_noise_prob_vector(nCirc, noiseModel)
-    real_job = RunTrue(nCirc, "79323d781b5f9aa51c83e04a522fdd8d3eeebeb7f21977bec8a64ce3bfb494d32c423e8cb7bc75a8eae679a97d498f3c69662fa2344fbcc8a751f2fd82e0ccb4")
-    real_res = real_job.result().get_counts()
+    real_job = RunTrue(nCirc,
+                       "79323d781b5f9aa51c83e04a522fdd8d3eeebeb7f21977bec8a64ce3bfb494d32c423e8cb7bc75a8eae679a97d498f3c69662fa2344fbcc8a751f2fd82e0ccb4")
+    real_res = get_prob_vector(real_job.result().get_counts(), circuit) / 1024
+    pickle.dump(real_res, open("real_res{}.p", "ab"))
     diffCN.append(diff_vec(cleanVec, noiseVec))
     diffCR.append(diff_vec(cleanVec, real_res))
     diffNR.append(diff_vec(noiseVec, real_res))
 
+legend = ((diffCN, diffCR, diffNR), ('diffCN', 'diffCR', 'diffNR'))
 plt.plot(dpt, diffCN)
 plt.plot(dpt, diffCR)
 plt.plot(dpt, diffNR)
+plt.legend(legend)
 plt.show()
 
 pickle.dump(diffCN, open("diffCN.p", "wb"))
