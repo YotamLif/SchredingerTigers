@@ -48,8 +48,8 @@ def sub_circuit(circ_in, num_gates):
 
 # gives difference of two vectors
 def diff_vec(vec1, vec2):
-    diff_vec = vec1 - vec2
-    return diff_vec
+    diff=np.linalg.norm(vec1 - vec2)
+    return diff
 
 
 # gives all three differences
