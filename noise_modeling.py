@@ -19,7 +19,7 @@ def make_expanded_error_list(quantum_error_list: List[QuantumError], gate_types_
     assert len(quantum_error_list) == len(gate_types_to_apply_error_list) and len(quantum_error_list) == len(
         qregs_to_apply_error_list)
     error_list = []
-    for error, gates, qregs in quantum_error_list, gate_types_to_apply_error_list, qregs_to_apply_error_list:
+    for error, gates, qregs in (quantum_error_list, gate_types_to_apply_error_list, qregs_to_apply_error_list):
         error_list.append((error, gates, qregs))
     return error_list
 
@@ -76,7 +76,8 @@ def get_noise_prob_vector(circuit: QuantumCircuit, noise_model: NoiseModel, n_sh
 def test():
     err1 = pauli_error([('X', 0.2), ('I', 0.8)])
     err2 = pauli_error([('X', 0.3), ('I', 0.7)])
-    errors = [(err1, ['x'], [1]), (err2, ['id'], [1])]
+    errors = make_expanded_error_list([err1, err2], [['x'],['id']], [[1],[1]])
+    # errors = [(err1, ['x'], [1]), (err2, ['id'], [1])]
     noise_model = make_noise_model(errors)
     qr = QuantumRegister(3)
     cr = ClassicalRegister(3)

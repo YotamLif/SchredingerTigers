@@ -7,6 +7,7 @@ from circ_break import circ_break
 from run_clean_model import plot_statevector, diff_vec
 from noise_modeling import get_noise_prob_vector, make_noise_model
 from run_true_comp import RunTrue
+import numpy as np
 
 import matplotlib.pyplot as plt
 
@@ -31,8 +32,12 @@ circuit.iden(qr[2])
 err1 = pauli_error([('X', 0.2), ('I', 0.8)])
 err2 = pauli_error([('X', 0.3), ('I', 0.7)])
 err3 = reset_error(0.1)
-errors = [(err1, ['X', 'Z'], [0, 1, 2]), (err2, ['ID'], [0, 1, 2]), (err3, ['CX'], [0, 1, 2])]
-noiseModel = (make_noise_model(errors))
+# errors = [(err1, ['X', 'Z'], [0, 1, 2]), (err2, ['ID'], [0, 1, 2]), (err3, ['CX'], [0, 1, 2])]
+
+noiseModel = NoiseModel()
+noiseModel.add_quantum_error(err1, ['x'], [0])
+noiseModel.add_quantum_error(err2, ['id'], [1])
+noiseModel.add_quantum_error(err3, ['z'], [2])
 
 
 
@@ -49,8 +54,8 @@ for lyr in dpt:
     #diffCR.append(diff_vec(cleanVec, realVec))
     #diffNR.append(diff_vec(noiseVec, realVec))
 
-plt.plot(dpt, diffCN, diffCR, diffNR)
-
+plt.plot(dpt, diffCN)
+plt.show()
 
 
 
