@@ -8,6 +8,7 @@ from run_clean_model import plot_statevector, diff_vec
 from noise_modeling import get_noise_prob_vector, make_noise_model
 from run_true_comp import RunTrue
 import numpy as np
+import pickle
 
 import matplotlib.pyplot as plt
 
@@ -35,13 +36,13 @@ err3 = reset_error(0.1)
 # errors = [(err1, ['X', 'Z'], [0, 1, 2]), (err2, ['ID'], [0, 1, 2]), (err3, ['CX'], [0, 1, 2])]
 
 noiseModel = NoiseModel()
-noiseModel.add_quantum_error(err1, ['x'], [0])
+noiseModel.add_quantum_error(err1, ['x'], [1])
+noiseModel.add_quantum_error(err2, ['id'], [0])
 noiseModel.add_quantum_error(err2, ['id'], [1])
+noiseModel.add_quantum_error(err2, ['id'], [2])
 noiseModel.add_quantum_error(err3, ['z'], [2])
 
-
-
-dpt = range(0,circuit.depth())
+dpt = range(0, circuit.depth())
 diffCN = []
 diffCR = []
 diffNR = []
@@ -53,17 +54,17 @@ for lyr in dpt:
     nCirc = circ_break(circuit, lyr)
     cleanVec = plot_statevector(nCirc)
     noiseVec = get_noise_prob_vector(nCirc, noiseModel)
-    realVec = RunTrue(nCirc,"9c4474dc9592228326651bd77bae7df998ffb5def6296d85789635df576a6b6004b19ba14b41224c0b60ce99bbb340c838f14ffb25af037c980ede48eef2d6e5")
+    real_job = RunTrue(nCirc, "79323d781b5f9aa51c83e04a522fdd8d3eeebeb7f21977bec8a64ce3bfb494d32c423e8cb7bc75a8eae679a97d498f3c69662fa2344fbcc8a751f2fd82e0ccb4")
+    real_res = real_job.result().get_counts()
     diffCN.append(diff_vec(cleanVec, noiseVec))
-    diffCR.append(diff_vec(cleanVec, realVec))
-    diffNR.append(diff_vec(noiseVec, realVec))
+    diffCR.append(diff_vec(cleanVec, real_res))
+    diffNR.append(diff_vec(noiseVec, real_res))
 
 plt.plot(dpt, diffCN)
+plt.plot(dpt, diffCR)
+plt.plot(dpt, diffNR)
 plt.show()
 
-
-
-
-
-
-
+pickle.dump(diffCN, open("diffCN.p", "wb"))
+pickle.dump(diffCR, open("diffCR.p", "wb"))
+pickle.dump(diffNR, open("diffNR.p", "wb"))
