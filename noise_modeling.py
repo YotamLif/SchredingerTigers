@@ -4,30 +4,38 @@ from qiskit.providers.aer.noise import NoiseModel
 from qiskit.providers.aer.noise.errors import pauli_error
 from qiskit.providers.aer.noise.errors import QuantumError
 from qiskit.qobj import qobj, QasmQobj, QasmQobjConfig
-from typing import List
+from typing import List, Tuple
 
 
-def make_noise_model(errors: List[(QuantumError, List[str], List[int])]):
-    noise = NoiseModel()
+def make_noise_model(errors: List[Tuple[QuantumError, List[str], List[int]]]):
+    noise_model = NoiseModel()
     for error in errors:
         q_error, instruction, qbits = error
-        noise.add_quantum_error(q_error, instruction, qbits)
+        noise_model.add_quantum_error(q_error, instruction, qbits)
+    return noise_model
 
 
-def apply_noise_model(num_qbits: int, noise_model: NoiseModel, layers: QasmQobj, shots=1024):
-    backend = Aer.get_backend('qasm_simulator')
+def apply_noise_model(noise_model: NoiseModel, circuit: QuantumCircuit, shots=1024, backend='qasm_simulator'):
+    backend = Aer.get_backend(backend)
+    res = execute(circuit, backend, noise_model=noise_model, shots=shots).result()
+    return res
 
-    qr = QuantumRegister(num_qbits)
-    cr = ClassicalRegister(num_qbits)
+
+def main():
+    err1 = pauli_error([('X', 0.2), ('I', 0.8)])
+    err2 = pauli_error([('X', 0.3), ('I', 0.7)])
+    errors = [(err1, ['x'], [1]), (err2, ['id'], [1])]
+    noise_model = make_noise_model(errors)
+    qr = QuantumRegister(3)
+    cr = ClassicalRegister(3)
     circle = QuantumCircuit(qr, cr)
-
-    for experiment in layers.experiments:
-        circle.append(experiment)
-
-    # circle.x(qr[0])
+    circle.iden(qr[0])
+    circle.iden(qr[1])
+    circle.x(qr[1])
     circle.measure(qr, cr)
 
-    # error = pauli_error([('X', 0.2), ('I', 0.8)])
+    print(apply_noise_model(noise_model, circle).get_counts())
 
-    res = execute(circle, backend, noise_model=noise_model, shots=shots).result()
-    return res
+
+if __name__ == '__main__':
+    main()
