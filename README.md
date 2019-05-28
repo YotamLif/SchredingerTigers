@@ -1,3 +1,3 @@
 # SchredingerTigers
 
-Understanding the Quantum Computing noice
+Understanding the Quantum Computing noise
