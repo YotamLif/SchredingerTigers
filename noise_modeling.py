@@ -9,9 +9,24 @@ from math import pow
 from run_clean_model import add_measurements
 
 
-def make_noise_model(errors: List[Tuple[QuantumError, List[str], List[int]]]):
+def make_expanded_error(quantum_error: QuantumError, gate_types_to_apply_error: List[str],
+                        qregs_to_apply_error: List[int]):
+    return quantum_error, gate_types_to_apply_error, qregs_to_apply_error
+
+
+def make_expanded_error_list(quantum_error_list: List[QuantumError], gate_types_to_apply_error_list: List[List[str]],
+                             qregs_to_apply_error_list: List[List[int]]):
+    assert len(quantum_error_list) == len(gate_types_to_apply_error_list) and len(quantum_error_list) == len(
+        qregs_to_apply_error_list)
+    error_list = []
+    for error, gates, qregs in quantum_error_list, gate_types_to_apply_error_list, qregs_to_apply_error_list:
+        error_list.append((error, gates, qregs))
+    return error_list
+
+
+def make_noise_model(expanded_errors: List[Tuple[QuantumError, List[str], List[int]]]) -> NoiseModel:
     noise_model = NoiseModel()
-    for error in errors:
+    for error in expanded_errors:
         q_error, instruction, qbits = error
         noise_model.add_quantum_error(q_error, instruction, qbits)
     return noise_model
