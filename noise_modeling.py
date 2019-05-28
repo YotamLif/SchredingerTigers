@@ -54,7 +54,7 @@ def get_difference(noise_model: NoiseModel, circuit: QuantumCircuit, n_shots=102
     res_no_noise = apply_model(circuit, n_shots, backend).get_counts()
     print(res_no_noise)
     print(res_noise)
-    res = get_prob_vector(res_noise, circuit) - get_prob_vector(res_no_noise, circuit)
+    res = (get_prob_vector(res_noise, circuit) - get_prob_vector(res_no_noise, circuit))/n_shots
     return res
 
 
@@ -69,11 +69,9 @@ def test():
     circle.iden(qr[0])
     circle.iden(qr[1])
     circle.x(qr[1])
-    # circle.measure(qr, cr)
 
     difference = get_difference(noise_model, circle)
     print(difference)
-    print(difference[0])
 
 
 if __name__ == '__main__':
