@@ -32,6 +32,18 @@ def add_measurements(circ):
     circ.measure(circ.qregs[0], circ.cregs[0])
     return circ
 
+# add measurements in X basis at the end of the circle
+def measure_X_basis(circ):
+    for qreg in circ.qregs:
+        circ.h(qreg)
+    return add_measurements(circ)
+        
+# add measurements in Y basis at the end of the circle    
+def measure_Y_basis(circ):
+    for qreg in circ.qregs:
+        circ.sdg(qreg)
+        circ.h(qreg)
+    return add_measurements(circ)
 
 # get sub-circuit
 def sub_circuit(circ_in, num_gates):
