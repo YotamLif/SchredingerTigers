@@ -3,6 +3,7 @@ from qiskit.providers.aer import QasmSimulator
 from qiskit.providers.aer.noise import NoiseModel
 from qiskit.providers.aer.noise.errors import pauli_error, reset_error
 
+from MeasureCompareBar import MeasureCompareBar
 from circ_break import circ_break
 from run_clean_model import plot_statevector, diff_vec
 from noise_modeling import get_noise_prob_vector, make_noise_model
@@ -63,6 +64,7 @@ for lyr in dpt:
     diffCN.append(diff_vec(cleanVec, noiseVec))
     diffCR.append(diff_vec(cleanVec, real_res))
     diffNR.append(diff_vec(noiseVec, real_res))
+    MeasureCompareBar(real_res,noiseVec, cleanVec)
 
 legend = ((diffCN, diffCR, diffNR), ('diffCN', 'diffCR', 'diffNR'))
 plt.plot(dpt, diffCN)
@@ -70,6 +72,7 @@ plt.plot(dpt, diffCR)
 plt.plot(dpt, diffNR)
 plt.legend(legend)
 plt.show()
+
 
 pickle.dump(diffCN, open("diffCN.p", "wb"))
 pickle.dump(diffCR, open("diffCR.p", "wb"))
