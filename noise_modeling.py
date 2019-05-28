@@ -6,11 +6,7 @@ from qiskit.providers.aer.noise.errors import QuantumError
 from qiskit.qobj import qobj, QasmQobj, QasmQobjConfig
 from typing import List, Tuple, Dict
 from math import pow
-
-
-def add_measurements(circle: QuantumCircuit) -> QuantumCircuit:
-    circle.measure(circle.qregs[0], circle.cregs[0])
-    return circle
+from run_clean_model import add_measurements
 
 
 def make_noise_model(errors: List[Tuple[QuantumError, List[str], List[int]]]):
@@ -54,8 +50,12 @@ def get_difference(noise_model: NoiseModel, circuit: QuantumCircuit, n_shots=102
     res_no_noise = apply_model(circuit, n_shots, backend).get_counts()
     print(res_no_noise)
     print(res_noise)
-    res = (get_prob_vector(res_noise, circuit) - get_prob_vector(res_no_noise, circuit))/n_shots
-    return res
+    return (get_prob_vector(res_noise, circuit) - get_prob_vector(res_no_noise, circuit)) / n_shots
+
+
+def get_noise_prob_vector(circuit: QuantumCircuit, noise_model: NoiseModel, n_shots=1024, backend='qasm_simulator'):
+    res_noise = apply_noise_model(noise_model, circuit, n_shots, backend).get_counts()
+    return get_prob_vector(res_noise, circuit) / n_shots
 
 
 def test():
