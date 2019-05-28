@@ -28,12 +28,19 @@ def apply_noise_model(noise_model: NoiseModel, circuit: QuantumCircuit, shots=10
     return res
 
 
+def apply_model(circuit: QuantumCircuit, n_shots=1024, backend='qasm_simulator'):
+    backend = Aer.get_backend(backend)
+    add_measurements(circuit)
+    res = execute(circuit, backend, shots=n_shots).result()
+    return res
+
+
 def get_prob_vector(result: Dict, circuit: QuantumCircuit):
     num_reg = circuit.qregs[0].size
     vec_length = int(pow(2, num_reg))
     prob_vector = np.zeros(vec_length)
     for i in range(vec_length):
-        index = int('{0:b}'.format(i)[::-1], 2)
+        index = int('{0:b}'.format(i).zfill(num_reg), 2)
         try:
             value = result[bin(i)[2:].zfill(num_reg)]
         except:
@@ -42,16 +49,11 @@ def get_prob_vector(result: Dict, circuit: QuantumCircuit):
     return prob_vector
 
 
-def apply_model(circuit: QuantumCircuit, shots=1024, backend='qasm_simulator'):
-    backend = Aer.get_backend(backend)
-    add_measurements(circuit)
-    res = execute(circuit, backend, shots=shots).result()
-    return res
-
-
-def get_difference(noise_model: NoiseModel, circuit: QuantumCircuit, shots=1024, backend='qasm_simulator'):
-    res_noise = apply_noise_model(noise_model, circuit, shots, backend).get_counts()
-    res_no_noise = apply_model(circuit, shots, backend).get_counts()
+def get_difference(noise_model: NoiseModel, circuit: QuantumCircuit, n_shots=1024, backend='qasm_simulator'):
+    res_noise = apply_noise_model(noise_model, circuit, n_shots, backend).get_counts()
+    res_no_noise = apply_model(circuit, n_shots, backend).get_counts()
+    print(res_no_noise)
+    print(res_noise)
     res = get_prob_vector(res_noise, circuit) - get_prob_vector(res_no_noise, circuit)
     return res
 
@@ -69,7 +71,9 @@ def test():
     circle.x(qr[1])
     # circle.measure(qr, cr)
 
-    print(get_difference(noise_model, circle))
+    difference = get_difference(noise_model, circle)
+    print(difference)
+    print(difference[0])
 
 
 if __name__ == '__main__':
